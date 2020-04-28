@@ -23,19 +23,19 @@ set :whenever_identifier, ->{ "#{fetch(:application)}_#{fetch(:stage)}" }
 set :output, "log/cron_log.log"
 env :PATH, ENV['PATH']
 
-every 1.month do
-  runner "MsrMailer.send_monthly_report(['hanis@uottawa.ca', 'bruno.mrlima@gmail.com']).deliver_now"
-end
+# every 1.month do
+#  runner "MsrMailer.send_monthly_report(['hanis@uottawa.ca', 'bruno.mrlima@gmail.com']).deliver_now"
+#end
 
 # At 7am of First day of every week
-every :monday, :at => '7am' do
-  runner "MsrMailer.send_weekly_report(['hanis@uottawa.ca', 'bruno.mrlima@gmail.com']).deliver_now"
-end
+# every :monday, :at => '7am' do
+#   runner "MsrMailer.send_weekly_report(['hanis@uottawa.ca', 'bruno.mrlima@gmail.com']).deliver_now"
+# end
 
 # At 7:30am of First day of every week
-every :monday, :at => '7am' do
-  runner "MsrMailer.send_training_report(['hanis@uottawa.ca', 'bruno.mrlima@gmail.com','brunsfield@uottawa.ca', 'MTC@uottawa.ca]).deliver_now"
-end
+# every :monday, :at => '7am' do
+#  runner "MsrMailer.send_training_report(['hanis@uottawa.ca', 'bruno.mrlima@gmail.com','brunsfield@uottawa.ca', 'MTC@uottawa.ca]).deliver_now"
+# end
 
 every :sunday, :at => '1am' do
   rake "active_volunteers:check_volunteers_status"
