@@ -6,35 +6,35 @@ class ReportGenerator
   def self.generate_visitors_report(start_date, end_date)
     spreadsheet = Axlsx::Package.new
 
-    spreadsheet.workbook.add_worksheet(name: 'Report') do |sheet|
+    space_details = self.get_visitors(start_date, end_date)
+
+    #region Overview
+    spreadsheet.workbook.add_worksheet(name: 'Overview') do |sheet|
       merge_cell = sheet.styles.add_style :alignment => { :vertical => :center }
 
       self.header(sheet, 'Visitors', start_date, end_date)
 
-      space_details = self.get_visitors(start_date, end_date)
-
-      #region Overview
       self.title(sheet, 'Overview')
-      self.table_header(sheet, ['Space', 'Distinct Users', 'Total Visits'])
+      self.table_header(sheet, ['Space', '', 'Distinct Users', 'Total Visits'])
 
       space_details[:spaces].each do |space_name, space|
-        sheet.add_row [space_name, space[:unique], space[:total]]
+        sheet.add_row [space_name, '', space[:unique], space[:total]]
       end
 
       sheet.add_row # spacing
 
-      self.table_header(sheet, ['Identity', 'Distinct Users', 'Total Visits'])
+      self.table_header(sheet, ['Identity', '', 'Distinct Users', 'Total Visits'])
 
       space_details[:identities].each do |identity_name, space|
-        sheet.add_row [identity_name, space[:unique], space[:total]]
+        sheet.add_row [identity_name, '', space[:unique], space[:total]]
       end
 
       sheet.add_row # spacing
 
-      self.table_header(sheet, ['Faculty', 'Distinct Users', 'Total Visits'])
+      self.table_header(sheet, ['Faculty', '', 'Distinct Users', 'Total Visits'])
 
       space_details[:faculties].each do |faculty_name, space|
-        sheet.add_row [faculty_name, space[:unique], space[:total]]
+        sheet.add_row [faculty_name, '', space[:unique], space[:total]]
       end
 
       sheet.add_row # spacing
@@ -53,22 +53,33 @@ class ReportGenerator
       end
 
       sheet.add_row # spacing
-      #endregion
 
-      #region Per-space details
-      space_details[:spaces].each do |space_name, space_detail|
+      self.table_header(sheet, ['Gender', '', 'Distinct Users', 'Total Visits'])
+      space_details[:genders].each do |gender_name, gender|
+        sheet.add_row [ gender_name, '', gender[:unique], gender[:total] ]
+      end
+
+      sheet.add_row # spacing
+    end
+    #endregion
+
+    #region Per-space details
+    space_details[:spaces].each do |space_name, space_detail|
+      spreadsheet.workbook.add_worksheet(name: space_name) do |sheet|
+        merge_cell = sheet.styles.add_style :alignment => { :vertical => :center }
+
         self.title(sheet, space_name)
 
-        self.table_header(sheet, ['Identity', 'Distinct Users', 'Total Visits'])
+        self.table_header(sheet, ['Identity', '', 'Distinct Users', 'Total Visits'])
         space_detail[:identities].each do |identity_name, identity|
-          sheet.add_row [ identity_name, identity[:unique], identity[:total] ]
+          sheet.add_row [ identity_name, '', identity[:unique], identity[:total] ]
         end
 
         sheet.add_row # spacing
 
-        self.table_header(sheet, ['Faculty', 'Distinct Users', 'Total Visits'])
+        self.table_header(sheet, ['Faculty', '', 'Distinct Users', 'Total Visits'])
         space_detail[:faculties].each do |faculty_name, faculty|
-          sheet.add_row [ faculty_name, faculty[:unique], faculty[:total] ]
+          sheet.add_row [ faculty_name, '', faculty[:unique], faculty[:total] ]
         end
 
         sheet.add_row # spacing
@@ -88,15 +99,15 @@ class ReportGenerator
 
         sheet.add_row # spacing
 
-        self.table_header(sheet, ['Gender', 'Distinct Users', 'Total Visits'])
+        self.table_header(sheet, ['Gender', '', 'Distinct Users', 'Total Visits'])
         space_detail[:genders].each do |gender_name, gender|
-          sheet.add_row [ gender_name, gender[:unique], gender[:total] ]
+          sheet.add_row [ gender_name, '', gender[:unique], gender[:total] ]
         end
 
         sheet.add_row # spacing
       end
-      #endregion
     end
+    #endregion
 
     spreadsheet
   end
