@@ -368,18 +368,23 @@ class ReportGenerator
   # @param [DateTime] end_date
   def self.generate_peak_hours_report(start_date, end_date)
     ls = LabSession.arel_table
+    s = Space.arel_table
 
-    result = ActiveRecord::Base.connection.exec_query(ls.project(
-      ls['sign_in_time'].extract('YEAR').as('year'),
-      ls['sign_in_time'].extract('MONTH').as('month'),
-      ls['sign_in_time'].extract('DAY').as('day'),
-      ls['sign_in_time'].extract('HOUR').as('hour'),
-      Arel.star.count.as('total_visits')
-    ).from(ls).where(ls['sign_in_time'].between(start_date..end_date)).group('year', 'month', 'day', 'hour').to_sql)
+    result = LabSession
+               .select([
+                         ls['sign_in_time'].extract('YEAR').as('year'),
+                         ls['sign_in_time'].extract('MONTH').as('month'),
+                         ls['sign_in_time'].extract('DAY').as('day'),
+                         ls['sign_in_time'].extract('HOUR').as('hour'),
+                         ls['space_id'],
+                         s['name'].minimum.as('space_name'),
+                         Arel.star.count.as('total_visits')
+                       ])
+               .joins(ls.join(s).on(s['id'].eq(ls['space_id'])).join_sources)
+               .where(ls['sign_in_time'].between(start_date..end_date))
+               .group('space_id', 'year', 'month', 'day', 'hour')
 
     visits_by_hour = {}
-    min_hour = 23
-    max_hour = 0
 
     result.each do |row|
       year = row['year'].to_i
@@ -390,56 +395,85 @@ class ReportGenerator
 
       date = DateTime.new(year, month, day, hour).localtime
 
-      min_hour = [min_hour, date.hour].min
-      max_hour = [max_hour, date.hour].max
+      unless visits_by_hour[row['space_id']]
+        visits_by_hour[row['space_id']] = { name: row['space_name'], visits: {}, hourly_totals: {} }
+      end
       
-      unless visits_by_hour[date.year]
-        visits_by_hour[date.year] = {}
+      unless visits_by_hour[row['space_id']][:visits][date.year]
+        visits_by_hour[row['space_id']][:visits][date.year] = {}
       end
 
-      unless visits_by_hour[date.year][date.month]
-        visits_by_hour[date.year][date.month] = {}
+      unless visits_by_hour[row['space_id']][:visits][date.year][date.month]
+        visits_by_hour[row['space_id']][:visits][date.year][date.month] = {}
       end
 
-      unless visits_by_hour[date.year][date.month][date.day]
-        visits_by_hour[date.year][date.month][date.day] = {}
+      unless visits_by_hour[row['space_id']][:visits][date.year][date.month][date.day]
+        visits_by_hour[row['space_id']][:visits][date.year][date.month][date.day] = {}
       end
 
-      visits_by_hour[date.year][date.month][date.day][date.hour] = total_visits
+      unless visits_by_hour[row['space_id']][:hourly_totals][date.hour]
+        visits_by_hour[row['space_id']][:hourly_totals][date.hour] = 0
+      end
+
+      visits_by_hour[row['space_id']][:visits][date.year][date.month][date.day][date.hour] = total_visits
+      visits_by_hour[row['space_id']][:hourly_totals][date.hour] += total_visits
     end
 
-    spreadsheet = Axlsx::Package.new
+    Axlsx::Package.new do |spreadsheet|
+      visits_by_hour.each do |_, space|
+        spreadsheet.workbook.add_worksheet(name: space[:name]) do |sheet|
+          self.title(sheet, 'Visitors by Hour')
+          sheet.add_row ['From', start_date.strftime('%Y-%m-%d')]
+          sheet.add_row ['To', end_date.strftime('%Y-%m-%d')]
+          sheet.add_row # spacing
 
-    spreadsheet.workbook.add_worksheet do |sheet|
-      self.title(sheet, 'Visitors by Hour')
-      sheet.add_row ['From', start_date.strftime('%Y-%m-%d')]
-      sheet.add_row ['To', end_date.strftime('%Y-%m-%d')]
-      sheet.add_row # spacing
-      
-      header = ['Date']
+          header = ['Date']
 
-      (min_hour..max_hour).each do |hour|
-        header << '%02i:00' % hour
-      end
-
-      self.table_header(sheet, header)
-
-      (start_date..end_date).each do |date|
-        row = [date.strftime('%Y-%m-%d')]
-
-        (min_hour..max_hour).each do |hour|
-          if visits_by_hour[date.year] and visits_by_hour[date.year][date.month] and visits_by_hour[date.year][date.month][date.day] and visits_by_hour[date.year][date.month][date.day][hour]
-            row << visits_by_hour[date.year][date.month][date.day][hour]
-          else
-            row << 0
+          (0..23).each do |hour|
+            header << '%02i:00' % hour
           end
-        end
 
-        sheet.add_row row
+          self.table_header(sheet, header)
+
+          row = ['Total']
+
+          (0..23).each do |hour|
+            if space[:hourly_totals][hour]
+              row << space[:hourly_totals][hour]
+            else
+              row << 0
+            end
+          end
+
+          sheet.add_row row
+
+          sheet.add_chart(Axlsx::BarChart, start_at: [26, 4], end_at: [36, 24], title: "Overall Trend", bar_dir: :col, show_legend: false, gap_width: "10") do |chart|
+            chart.add_series(data: sheet["B6:Y6"], labels: sheet["B5:Y5"], colors: Array.new(24) { "4472C4" })
+
+            chart.cat_axis.label_rotation = -90
+            chart.cat_axis.gridlines = false
+            chart.val_axis.color = "FFFFFF"
+            chart.val_axis.major_gridlines_color = "D9D9D9"
+          end
+
+          (start_date..end_date).each do |date|
+            row = [date.strftime('%Y-%m-%d')]
+
+            (0..23).each do |hour|
+              if space[:visits][date.year] and space[:visits][date.year][date.month] and space[:visits][date.year][date.month][date.day] and space[:visits][date.year][date.month][date.day][hour]
+                row << space[:visits][date.year][date.month][date.day][hour]
+              else
+                row << 0
+              end
+            end
+
+            sheet.add_row row
+          end
+
+          sheet.column_widths nil, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6
+        end
       end
     end
-
-    spreadsheet
   end
 
   #endregion

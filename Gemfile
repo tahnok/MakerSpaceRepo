@@ -41,6 +41,7 @@ gem 'wicked_pdf'
 gem 'wkhtmltopdf-binary'
 gem 'paperclip-av-transcoder'
 gem 'caxlsx', '~> 3.0.1'
+gem 'xlsxwriter', '~> 0.2.0'
 
 group :development, :test do
   gem 'factory_girl_rails', '~> 4.2.1'
