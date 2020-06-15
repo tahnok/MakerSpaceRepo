@@ -1,7 +1,19 @@
 <% provide(:title, "Proficient Project") %>
 <section class="card w3-card-2 <%= return_border_color(@proficient_project.level) %>">
-  <div class="float-right">
-    <%=link_to "Edit", edit_proficient_project_path(@proficient_project.id), class:"btn btn-primary float-right mr-5 mt-5" if current_user.admin?%>
+  <div>
+    <%=link_to 'Delete', @proficient_project, method: :delete, class: "btn btn-danger float-left ml-5 mt-5", style: "opacity: 0.5", data: {confirm: 'Are you sure? This will delete all the purchases and give all the users the CC points used to purchase this project.'} if current_user.admin?%>
+    <b class="float-left ml-5 mt-5 text-info p-1"><%= @proficient_project.cc.nil? || @proficient_project.cc.eql?(0) ? "<b class='text-success'>FREE</b>".html_safe : @proficient_project.cc.to_s + " Ccs" %></b>
+    <%=link_to "Edit", edit_proficient_project_path(@proficient_project.id), class:"btn btn-primary float-right mr-5 mt-5", style: "opacity: 0.5" if current_user.admin?%>
+  </div>
+  <div class="text-center">
+    Badge that will be Awarded:
+    <br />
+    <% badge_template = @proficient_project.badge_template %>
+    <% if badge_template.present? %>
+      <%= image_tag(badge_template.image_url, :style => "width: 100px;") %>
+    <% else %>
+      None
+    <% end %>
   </div>
   <div class="col-lg-7 mx-auto">
     <br />
@@ -25,7 +37,7 @@
       <br />
       <div class="row">
         <div class="col-lg-12">
-          <div class="jumbotron text-center word-break">
+          <div class="jumbotron text-center text-wrap">
             <%= @proficient_project.description.html_safe %>
           </div>
           <div id="show-photo">
@@ -113,4 +125,3 @@
   </div>
 <% end %>
 <%= render 'layouts/photoswipe' %>
-

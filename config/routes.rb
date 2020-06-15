@@ -1,4 +1,30 @@
 Rails.application.routes.draw do
+  resources :price_rules, only: [:index, :new, :create, :destroy, :edit, :update]
+  resources :discount_codes, only: [:new, :index, :create]
+  resources :custom_webhooks do
+    collection do
+      post :orders_paid
+    end
+  end
+
+  resources :videos, only: [:index, :new, :create, :destroy]
+  get 'videos/:id/download/:filename', to: 'videos#download', constraints: { filename: /.+/ }, as: 'download_video'
+
+  require 'sidekiq/web'
+  Sidekiq::Web.use Rack::Auth::Basic do |username, password|
+    get_username = Rails.application.secrets.sidekiq_username || "adam"
+    get_password = Rails.application.secrets.sidekiq_password || "Password1"
+    username == get_username && password == get_password
+  end
+  mount Sidekiq::Web => '/sidekiq'
+
+  resources :carts, only: [:index]
+  resources :order_items, only: [:create, :update, :destroy] do
+    get :revoke, path: 'revoke'
+  end
+
+  resources :orders, only: [:index, :create, :destroy]
+
   get '/saml/auth' => 'saml_idp#login'
   get '/saml/metadata' => 'saml_idp#metadata'
   post '/saml/auth' => 'saml_idp#auth'
@@ -106,6 +132,8 @@ Rails.application.routes.draw do
   namespace :admin do
     get 'index', path: '/'
 
+    get 'manage_badges'
+
     namespace :report_generator do
       get 'index', path: '/'
       post 'generate', path: '/generate', format: :xlsx
@@ -189,12 +217,30 @@ Rails.application.routes.draw do
   resources :development_programs, only: [:index] do
     collection do
       get :join_development_program
+      get :skills
+    end
+  end
+
+  resources :badges, only: [:index] do
+    collection do
+      get :admin
+      get :new_badge
+      get :revoke_badge
+      get :populate_badge_list
+      get :certify
+      get "grant_badge", path: "grant"
+      get :reinstate
+      get :update_badge_data
+      get :update_badge_templates
+      get :populate_grant_users
+      get :populate_revoke_users
     end
   end
 
   resources :proficient_projects do
     collection do
       get :join_development_program
+      get :open_modal
     end
   end
 

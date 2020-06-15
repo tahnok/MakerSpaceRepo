@@ -19,7 +19,7 @@ gem 'photoswipe-rails', '~> 4.0.8a'
 gem 'fastimage', '~> 1.7.0'
 gem 'font-awesome-rails', '~> 4.6.3.0'
 gem 'octokit', '~> 3.0'
-gem 'kaminari', '~> 0.16.3'
+gem 'kaminari', '~> 1.2.1'
 gem 'progress_bar', '~> 1.0.3'
 gem 'redactor-rails', '~> 0.5.0'
 gem 'sdoc', '~> 0.4.0', group: :doc
@@ -40,26 +40,34 @@ gem 'quick_random_records'
 gem 'wicked_pdf'
 gem 'wkhtmltopdf-binary'
 gem 'paperclip-av-transcoder'
+gem 'sidekiq'
+gem 'excon'
+gem 's3_direct_upload'
 gem 'caxlsx', '~> 3.0.1'
 gem 'xlsxwriter', '~> 0.2.0'
+# Flash messages in JS
+gem 'toastr-rails'
+# Capistrano deployment stuff
+gem 'capistrano', '~> 3.9'
+gem 'capistrano-rails'
+gem 'capistrano-bundler'
+gem 'capistrano-passenger', '>= 0.1.1'
+gem 'capistrano-rbenv', '~> 2.1'
+gem 'net-ssh'
+gem "shopify_app", "~> 7.2"
 
 group :development, :test do
   gem 'factory_girl_rails', '~> 4.2.1'
   gem 'byebug', '~> 5.0.0'
   gem 'spring', '~> 1.3.4'
   gem 'railroady'
+  gem 'simplecov', require: false
+  gem 'faker', '~> 1.1.2'
 end
 
 group :development do
   gem 'web-console', '~> 2.0'
   gem 'letter_opener' # Open emails in development
-
-  # Capistrano deployment stuff
-  gem 'capistrano', '~> 3.9'
-  gem 'capistrano-rails'
-  gem 'capistrano-bundler'
-  gem 'capistrano-passenger', '>= 0.1.1'
-  gem 'capistrano-rbenv', '~> 2.1'
 
   # ssh deployment
   gem 'ed25519', '~> 1.2'
@@ -69,10 +77,8 @@ group :development do
 end
 
 group :test do
-  gem 'faker', '~> 1.1.2'
   gem 'capybara', '~> 2.1.0'
   gem 'database_cleaner', '~> 1.0.1'
   gem 'launchy', '~> 2.3.0'
   gem 'selenium-webdriver', '~> 2.39.0'
-
 end
