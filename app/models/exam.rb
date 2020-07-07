@@ -25,3 +25,4 @@ class Exam < ApplicationRecord
     status == 'failed'
   end
 end
+
