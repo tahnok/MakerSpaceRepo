@@ -45,6 +45,6 @@ class DiscountCode < ApplicationRecord
   end
 
   def destroy_cc
-    CcMoney.find_by(discount_code_id: id).destroy if usage_count.zero?
+    CcMoney.where(discount_code_id: id).destroy_all if usage_count.zero? && CcMoney.where(discount_code_id: id).present?
   end
 end

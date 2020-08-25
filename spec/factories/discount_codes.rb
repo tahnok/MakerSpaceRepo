@@ -4,6 +4,7 @@ FactoryBot.define do
     association :price_rule
     shopify_discount_code_id { Faker::Number.number(digits: 13) }
     code { Faker::Alphanumeric.alphanumeric(number: 30) }
+    usage_count { 0 }
 
     trait 'unused' do
       usage_count { 0 }

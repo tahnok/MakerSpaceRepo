@@ -8,7 +8,7 @@ RSpec.describe DiscountCode, type: :model do
     end
     context 'has_many' do
       it { should have_many(:cc_moneys) }
-      it 'dependent destroy: should destroy cc_moneys if destroyed' do
+      it 'should destroy cc_moneys if destroyed and if not used' do
         discount_code = create(:discount_code_with_cc_moneys)
         expect { discount_code.destroy }.to change { CcMoney.count }.by(-discount_code.cc_moneys.count)
       end
