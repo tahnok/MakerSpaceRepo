@@ -17,4 +17,5 @@ class CcMoney < ApplicationRecord
     user.update_wallet
     cc_money
   end
+
 end

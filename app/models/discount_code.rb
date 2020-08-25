@@ -2,9 +2,10 @@
 
 class DiscountCode < ApplicationRecord
   include ShopifyConcern
+  before_destroy :destroy_cc
   belongs_to :price_rule
   belongs_to :user
-  has_many :cc_moneys, dependent: :destroy
+  has_many :cc_moneys, dependent: :nullify
   validates :shopify_discount_code_id, presence: true
   validates :code, presence: true
   scope :used_code, -> { where(usage_count: 1) }
@@ -41,5 +42,9 @@ class DiscountCode < ApplicationRecord
     DiscountCode.start_session
     shopify_discount_code = ShopifyAPI::DiscountCode.where(id: shopify_discount_code_id, price_rule_id: price_rule.shopify_price_rule_id).last
     shopify_discount_code.destroy
+  end
+
+  def destroy_cc
+    CcMoney.find_by(discount_code_id: id).destroy if usage_count.zero?
   end
 end
