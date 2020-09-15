@@ -2,12 +2,68 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700" rel="stylesheet">
+
     <style>
-      /* Email styles need to be inline */
+      body {
+        font: 400 14px 'Raleway', sans-serif;
+        color: #333;
+      }
+
+      .container {
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 400px;
+      }
+
+      .header {
+        margin: 20px 0;
+      }
+
+      .logo {
+        display: block;
+        font: 400 36px 'Raleway', sans-serif;
+        text-align: center;
+        color: #333;
+        text-decoration: none;
+      }
+
+      .logo-bold {
+        font-weight: 700;
+      }
+
+      .content {
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+        padding: 10px 20px;
+      }
+
+      .button {
+        background-color: rgb(95, 158, 160);
+        padding: 0.5em 1em;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #fff;
+      }
+
+      .call-to-action {
+        font-size: 16px;
+        text-align: center;
+        margin: 30px 0;
+      }
     </style>
   </head>
 
   <body>
-    <%= yield %>
+    <div class="container">
+      <div class="header">
+        <a class="logo" href="<%= url_for root_url %>">Maker<span class="logo-bold">Repo</span></a>
+      </div>
+
+      <div class="content">
+        <%= yield %>
+      </div>
+    </div>
   </body>
 </html>

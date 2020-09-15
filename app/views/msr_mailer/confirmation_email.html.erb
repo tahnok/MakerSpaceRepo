@@ -1,18 +1,12 @@
-<section style="padding-left: 8vw;padding-top: 5vw;">
-  <p style="font: 400 1.3em 'Raleway', sans-serif;color: #333;"><h1>
-  Welcome to MakerRepo, <%= @user.name %>!
-</h1>
-  </p>
+<p>Hi <%= @user.name %>,</p>
 
-  <p style="font: 400 1.1em 'Raleway', sans-serif;color: #333; line-height: 35px;">
-    You are almost done signing up to MakerRepo.com. <br>
-    Please confirm your email with the following <%= link_to "link", confirm_users_url(token: @hash) %>. <br>
-    If the link doesn't work, you can copy the following link : <%= confirm_users_url(token: @hash)  %>
-  </p>
+<p>You are almost done signing up to MakerRepo! Press the button below to complete your registration:</p>
 
+<p class="call-to-action"><%= link_to 'Confirm my email address', confirm_users_url(token: @hash), class: 'button', target: '_blank' %></p>
 
-  <p style="  font: 400 1.1em 'Raleway', sans-serif;color: #333;">
-    Cheers,<br>
-    The MakerRepo Team
-  </p>
-</section>
+<p>If the button above does not work, please copy the following link into your browser: <%= link_to confirm_users_url(token: @hash), confirm_users_url(token: @hash), target: '_blank' %></p>
+
+<p>
+  Cheers,<br>
+  The MakerRepo Team
+</p>
