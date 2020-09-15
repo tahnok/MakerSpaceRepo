@@ -6,6 +6,10 @@ class MsrMailerPreview < ActionMailer::Preview
     MsrMailer.welcome_email(User.first)
   end
 
+  def confirmation_email
+    MsrMailer.confirmation_email(User.first, '1234')
+  end
+
   def repository_email
     MsrMailer.repo_report(Repository.first)
   end
