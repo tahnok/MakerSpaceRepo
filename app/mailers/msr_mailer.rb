@@ -5,7 +5,7 @@ class MsrMailer < ApplicationMailer
   def confirmation_email(user, hash)
     @user = user
     @hash = hash
-    mail(to: @user.email, subject: 'Makerepo | Please confirm your email')
+    mail(to: @user.email, subject: 'Please confirm your email address')
   end
 
   def email_confirmation_email(new_email, user, user_hash, email_hash)
@@ -13,18 +13,17 @@ class MsrMailer < ApplicationMailer
     @user = user
     @email_hash = email_hash
     @user_hash = user_hash
-    mail(to: new_email, subject: 'Makerepo | Please confirm your new email')
+    mail(to: new_email, subject: 'Please confirm your new email address')
   end
 
   def email_changed_email(user, old_email)
     @user = user
-    mail(to: old_email, subject: 'Makerepo | Email has changed')
+    mail(to: old_email, subject: 'Email address changed')
   end
 
   def welcome_email(user)
     @user = user
-    @url  = 'http://makerepo.com/login'
-    mail(to: @user.email, subject: 'Welcome to MakerRepo')
+    mail(to: @user.email, subject: 'Welcome to MakerRepo!')
   end
 
   def send_survey

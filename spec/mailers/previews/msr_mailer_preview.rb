@@ -10,6 +10,10 @@ class MsrMailerPreview < ActionMailer::Preview
     MsrMailer.confirmation_email(User.first, '1234')
   end
 
+  def email_changed_email
+    MsrMailer.email_changed_email(User.first, 'oldemail@example.com')
+  end
+
   def repository_email
     MsrMailer.repo_report(Repository.first)
   end
