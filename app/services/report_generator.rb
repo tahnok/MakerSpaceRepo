@@ -111,16 +111,16 @@ class ReportGenerator
         prefer_not = space_detail[:genders]['Prefer not to specify'].present? ? space_detail[:genders]['Prefer not to specify'][:unique] : 0
         final_other = other + prefer_not
 
-        sheet.add_chart(Axlsx::Pie3DChart, rot_x: 90, :start_at => "A#{space.row_index + 2}", :end_at => "C#{space.row_index + 10}", :grouping => :stacked, :show_legend => true, :title => 'Gender of unique users') do |chart|
-          chart.add_series :data => [male, female, final_other], :labels => ['Male', 'Female', 'Other/Prefer not to specify'], :colors => ['1FC3AA', '8624F5', 'A8A8A8', 'A8A8A8']
-          chart.add_series :data => [male, female, final_other], :labels => ['Male', 'Female', 'Other/Prefer not to specify'], :colors => ['FFFF00', 'FFFF00', 'FFFF00']
+        sheet.add_chart(Axlsx::Pie3DChart, rot_x: 90, start_at: "A#{space.row_index + 2}", end_at: "C#{space.row_index + 10}", grouping: :stacked, show_legend: true, title: 'Gender of unique users') do |chart|
+          chart.add_series data: [male, female, final_other], labels: ['Male', 'Female', 'Other/Prefer not to specify'], colors: ['1FC3AA', '8624F5', 'A8A8A8', 'A8A8A8']
+          chart.add_series data: [male, female, final_other], labels: ['Male', 'Female', 'Other/Prefer not to specify'], colors: ['FFFF00', 'FFFF00', 'FFFF00']
           chart.d_lbls.show_percent = true
           chart.d_lbls.d_lbl_pos = :bestFit
         end
 
-        sheet.add_chart(Axlsx::Pie3DChart, rot_x: 90, :start_at => "D#{space.row_index + 2}", :end_at => "H#{space.row_index + 10}", :grouping => :stacked, :show_legend => true, :title => 'Faculty of unique users') do |chart2|
-          chart2.add_series :data => faculty_hash.values, :labels => faculty_hash.keys, :colors => ['416145', '33EEDD', '860F48', '88E615', '6346F0', 'F5E1FE', 'E9A55B', 'A2F8FA', '260AD2', '12032E', '755025', '723634']
-          chart2.add_series :data => faculty_hash.values, :labels => faculty_hash.keys, :colors => ['416145', '33EEDD', '860F48', '88E615', '6346F0', 'F5E1FE', 'E9A55B', 'A2F8FA', '260AD2', '12032E', '755025', '723634']
+        sheet.add_chart(Axlsx::Pie3DChart, rot_x: 90, start_at: "D#{space.row_index + 2}", end_at: "H#{space.row_index + 10}", grouping: :stacked, show_legend: true, title: 'Faculty of unique users') do |chart2|
+          chart2.add_series data: faculty_hash.values, labels: faculty_hash.keys, colors: ['416145', '33EEDD', '860F48', '88E615', '6346F0', 'F5E1FE', 'E9A55B', 'A2F8FA', '260AD2', '12032E', '755025', '723634']
+          chart2.add_series data: faculty_hash.values, labels: faculty_hash.keys, colors: ['416145', '33EEDD', '860F48', '88E615', '6346F0', 'F5E1FE', 'E9A55B', 'A2F8FA', '260AD2', '12032E', '755025', '723634']
           chart2.d_lbls.show_percent = true
           chart2.d_lbls.d_lbl_pos = :bestFit
         end
@@ -286,9 +286,9 @@ class ReportGenerator
       prefer_not = users.where(gender: 'Prefer not to specify').count
       final_other = other + prefer_not
 
-      sheet.add_chart(Axlsx::Pie3DChart, rot_x: 90, :start_at => 'D1', :end_at => 'G8', :grouping => :stacked, :show_legend => true, :title => 'Gender of new users') do |chart|
-        chart.add_series :data => [male, female, final_other], :labels => ['Male', 'Female', 'Other/Prefer not to specify'], :colors => ['1FC3AA', '8624F5', 'A8A8A8', 'A8A8A8']
-        chart.add_series :data => [male, female, final_other], :labels => ['Male', 'Female', 'Other/Prefer not to specify'], :colors => ['FFFF00', 'FFFF00', 'FFFF00']
+      sheet.add_chart(Axlsx::Pie3DChart, rot_x: 90, start_at: 'D1', end_at: 'G8', grouping: :stacked, show_legend: true, title: 'Gender of new users') do |chart|
+        chart.add_series data: [male, female, final_other], labels: ['Male', 'Female', 'Other/Prefer not to specify'], colors: ['1FC3AA', '8624F5', 'A8A8A8', 'A8A8A8']
+        chart.add_series data: [male, female, final_other], labels: ['Male', 'Female', 'Other/Prefer not to specify'], colors: ['FFFF00', 'FFFF00', 'FFFF00']
         chart.d_lbls.show_percent = true
         chart.d_lbls.d_lbl_pos = :bestFit
       end
@@ -541,7 +541,7 @@ class ReportGenerator
 
     spreadsheet = Axlsx::Package.new
 
-    spreadsheet.workbook.add_worksheet do |sheet|
+    spreadsheet.workbook.add_worksheet(name: 'Visitors by Hour') do |sheet|
       title(sheet, 'Visitors by Hour')
       sheet.add_row ['From', start_date.strftime('%Y-%m-%d')]
       sheet.add_row ['To', end_date.strftime('%Y-%m-%d')]
@@ -567,6 +567,19 @@ class ReportGenerator
         end
 
         sheet.add_row row
+      end
+    end
+
+    spreadsheet.workbook.add_worksheet(name: 'Charts') do |sheet|
+      title(sheet, "Visitor's average")
+
+      sessions = LabSession.get_popular_hours_per_period(start_date.to_date, end_date.to_date, Space.all.pluck(:id))
+
+      (0..6).each do |weekday|
+        sheet.add_chart(Axlsx::Bar3DChart, start_at: "A#{1+(weekday*22)}", end_at: "L#{20 + (weekday*21)}", bar_dir: :col, :show_legend => false, title: "Average for #{Date::DAYNAMES[weekday]}s") do |chart|
+          chart.add_series data: sessions[weekday].values, labels: ["0h", "1h", "2h", "3h", "4h", "5h", "6h", "7h", "8h", "9h", "10h", "11h", "12h", "13h", "14h", "15h", "16h", "17h", "18h", "19h", "20h", "21h", "22h", "23h"], colors: ['858B03', '420A9B', 'ED557E', 'A6B15F', '263B98', 'AC528E', '56B9A2', '7E419C', 'B02E60', '6FF2F5', '2A16B9', '4FEF89', '2E86EF', '20938D', 'CDDBFC', 'F27173', '9A37AA', 'FB9727', '631E69', 'C270D7', '7D8DDE', 'F602C4', 'BBF531', 'A84B79']
+          chart.add_series data: sessions[weekday].values, labels: ["0h", "1h", "2h", "3h", "4h", "5h", "6h", "7h", "8h", "9h", "10h", "11h", "12h", "13h", "14h", "15h", "16h", "17h", "18h", "19h", "20h", "21h", "22h", "23h"], colors: ['858B03', '420A9B', 'ED557E', 'A6B15F', '263B98', 'AC528E', '56B9A2', '7E419C', 'B02E60', '6FF2F5', '2A16B9', '4FEF89', '2E86EF', '20938D', 'CDDBFC', 'F27173', '9A37AA', 'FB9727', '631E69', 'C270D7', '7D8DDE', 'F602C4', 'BBF531', 'A84B79']
+        end
       end
     end
 
