@@ -13,11 +13,17 @@ class SessionsController < ApplicationController
       if @user
         if @user.confirmed?
           @user.update(last_signed_in_time: DateTime.now)
-          if request.env['HTTP_REFERER'] == login_authentication_url
-            format.html { redirect_to root_path }
-          else
-            format.html { redirect_back(fallback_location: root_path) }
-          end
+          format.html {
+            if @user.otp_secret.present?
+              redirect_to login_otp_two_factor_auth_index_path
+            else
+              if request.env['HTTP_REFERER'] == login_authentication_url
+                redirect_to root_path
+              else
+                redirect_back(fallback_location: root_path)
+              end
+            end
+          }
           format.json {
             render json: {user: @user.as_json, signed_in: true, token: @user.token}
           }

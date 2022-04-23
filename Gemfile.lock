@@ -1034,6 +1034,7 @@ GEM
       rubyzip (>= 1.3.0, < 3)
     childprocess (3.0.0)
     chronic (0.10.2)
+    chunky_png (1.4.0)
     climate_control (0.2.0)
     clipboard-rails (1.7.1)
     cocaine (0.5.8)
@@ -1292,6 +1293,11 @@ GEM
       nokogiri
       roo (>= 2.0.0, < 3)
       spreadsheet (> 0.9.0)
+    rotp (6.2.0)
+    rqrcode (2.1.1)
+      chunky_png (~> 1.0)
+      rqrcode_core (~> 1.0)
+    rqrcode_core (1.2.0)
     rspec-core (3.10.1)
       rspec-support (~> 3.10.0)
     rspec-expectations (3.10.1)
@@ -1519,6 +1525,8 @@ DEPENDENCIES
   recaptcha
   roo (~> 2.8.3)
   roo-xls
+  rotp
+  rqrcode
   rspec-rails (~> 5.0.0)
   rubocop-rails
   rubyzip (~> 2.1)

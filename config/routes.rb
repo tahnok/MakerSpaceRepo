@@ -125,6 +125,16 @@ Rails.application.routes.draw do
     get 'check_signed_in'
   end
 
+
+  # TWO FACTOR
+  resources :two_factor_auth, only: [:create] do
+    collection do
+      get :login_otp
+      post :verify_otp
+      post :deactivate
+    end
+  end
+
   # GITHUB
   namespace :github do
     get 'authorize'

@@ -1,7 +1,4 @@
 <% provide(:title, "Settings") %>
-<% if flash[:notice] %>
-  <div id="notice"><%= flash[:notice] %></div>
-<% end %>
 
 <div class="edit-column">
   <div class="setting-title">Account Setting</div>
@@ -41,6 +38,30 @@
     </div>
     <%= submit_tag "Update Email", class: "btn btn-secondary" %>
 
+  <% end %>
+
+  <div class="seperator"></div>
+
+  <div class="section-desc">Two Factor Authentication</div>
+
+  <% if @user.otp_secret %>
+    <%= form_tag deactivate_two_factor_auth_index_path, method: :post do %>
+      <div class="form-group">
+        <%= label_tag :otp_attempt, "Verify (enter a one-time password)" %>
+        <%= text_field_tag :otp_attempt, nil, class: 'profile-text form-control' %>
+      </div>
+      <%= submit_tag "Remove Two-Factor Authentication", class: "btn btn-danger" %>
+    <% end %>
+  <% else %>
+    <%= form_tag two_factor_auth_index_path, method: :post do %>
+      <%= hidden_field_tag :otp_secret, @otp_secret %>
+      <%= image_tag @qr_code %>
+      <div class="form-group">
+        <%= label_tag :otp_attempt, "Verify (enter a one-time password)" %>
+        <%= text_field_tag :otp_attempt, nil, class: 'profile-text form-control' %>
+      </div>
+      <%= submit_tag "Verify", class: "btn btn-primary" %>
+    <% end %>
   <% end %>
 
   <div class="seperator"></div>
