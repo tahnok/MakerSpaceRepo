@@ -2,6 +2,7 @@
   <h2 class="text-center">Two Factor Authentication Sign In</h2>
 
   <%= form_tag verify_otp_two_factor_auth_index_path, method: :post do %>
+    <%= hidden_field_tag :saml, params[:saml] %>
     <%= label_tag :otp_attempt, "Enter a one-time password" %>
     <div class="form-group">
       <%= text_field_tag :otp_attempt, nil, class: 'form-control' %>

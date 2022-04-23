@@ -1,5 +1,7 @@
 class TwoFactorAuthController < ApplicationController
 
+  include SamlIdp::Controller
+
   before_action :signed_in, except: [:login_otp, :verify_otp]
   before_action :check_otp_code, only: [:login_otp, :verify_otp]
 
@@ -10,12 +12,17 @@ class TwoFactorAuthController < ApplicationController
     if last_otp_at
       @user.update(last_otp_at: last_otp_at)
       session[:user_id] = @user.id
+      @saml_response = encode_response(@user)
       session[:two_factor_unverified] = nil
       flash[:notice] = 'Successfully signed-in with your Two-Factor Authentication Code!'
     else
       flash[:alert] = 'Invalid Two-Factor Authentication Code'
     end
-    redirect_to root_path
+    if params[:saml].present? && params[:saml] == 'true' && @saml_response.present?
+      render template: 'saml/saml_post'
+    else
+      redirect_to root_path
+    end
   end
 
   def create

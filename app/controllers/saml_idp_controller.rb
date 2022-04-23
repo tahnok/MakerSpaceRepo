@@ -43,8 +43,12 @@ class SamlIdpController < ApplicationController
     if @current_user.nil?
       render template: 'saml/login'
     else
-      @saml_response = encode_response @current_user
-      render template: 'saml/saml_post'
+      if @current_user.otp_secret.present?
+        redirect_to login_otp_two_factor_auth_index_path(saml: true)
+      else
+        @saml_response = encode_response @current_user
+        render template: 'saml/saml_post'
+      end
     end
   end
 end
