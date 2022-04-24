@@ -12,14 +12,13 @@ class TwoFactorAuthController < ApplicationController
     if last_otp_at
       @user.update(last_otp_at: last_otp_at)
       session[:user_id] = @user.id
-      @saml_response = encode_response(@user)
       session[:two_factor_unverified] = nil
       flash[:notice] = 'Successfully signed-in with your Two-Factor Authentication Code!'
     else
       flash[:alert] = 'Invalid Two-Factor Authentication Code'
     end
-    if params[:saml].present? && params[:saml] == 'true' && @saml_response.present?
-      render template: 'saml/saml_post'
+    if params[:saml].present? && params[:saml] == 'true' && params[:SAMLRequest].present? && params[:RelayState].present?
+      redirect_to saml_auth_path(submit: 'current_user', SAMLRequest: params[:SAMLRequest], RelayState: params[:RelayState])
     else
       redirect_to root_path
     end

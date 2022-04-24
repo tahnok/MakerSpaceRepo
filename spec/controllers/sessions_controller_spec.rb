@@ -15,6 +15,14 @@ RSpec.describe SessionsController, type: :controller do
         expect(response).to redirect_to root_path
       end
 
+      it 'should redirect to the otp' do
+        @user = create(:user, :otp)
+        post :login_authentication, params: {username_email: @user.username, password: 'asa32A353#'}
+        expect(response).to redirect_to login_otp_two_factor_auth_index_path
+        expect(session[:user_id]).to eq(nil)
+        expect(session[:two_factor_unverified]).to eq(@user.id)
+      end
+
       it 'should not login the user that isn\'t confirmed' do
         @user = create(:user, :regular_user_not_confirmed)
         post :login_authentication, params: {username_email: @user.email, password: 'asa32A353#'}

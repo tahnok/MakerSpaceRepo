@@ -5,10 +5,12 @@ module ApplicationHelper
 
   def sign_in(username_email, password)
     user = User.authenticate(username_email, password)
-    if user.otp_secret.present?
-      session[:two_factor_unverified] = user.id unless user.nil?
-    else
-      session[:user_id] = user.id unless user.nil? || user.otp_secret.present?
+    unless user.nil?
+      if user.otp_secret.present?
+        session[:two_factor_unverified] = user.id
+      else
+        session[:user_id] = user.id unless user.otp_secret.present?
+      end
     end
     user
   end

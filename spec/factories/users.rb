@@ -15,6 +15,11 @@ FactoryBot.define do
     trait :regular_user do
     end
 
+    trait :otp do
+      otp_secret { 'thisisasecret' }
+      last_otp_at { DateTime.now - 1 }
+    end
+
     trait :regular_user_not_confirmed do
       confirmed { false }
     end

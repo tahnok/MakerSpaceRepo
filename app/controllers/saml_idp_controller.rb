@@ -43,8 +43,8 @@ class SamlIdpController < ApplicationController
     if @current_user.nil?
       render template: 'saml/login'
     else
-      if @current_user.otp_secret.present?
-        redirect_to login_otp_two_factor_auth_index_path(saml: true)
+      if @current_user.otp_secret.present? && !session[:two_factor_unverified].nil?
+        redirect_to login_otp_two_factor_auth_index_path(saml: true, SAMLRequest: params[:SAMLRequest], RelayState: params[:RelayState])
       else
         @saml_response = encode_response @current_user
         render template: 'saml/saml_post'
