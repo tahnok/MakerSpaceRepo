@@ -21,7 +21,7 @@ class Question < ApplicationRecord
   has_many_attached :images
   validates :images,
             file_content_type: {
-              allow: %w[image/jpeg image/png],
+              allow: %w[image/jpeg image/png image/webp],
               if: -> { images.attached? }
             }
 end
