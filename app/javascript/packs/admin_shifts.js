@@ -397,13 +397,13 @@ const openModal = (arg) => {
 };
 const modifyEvent = (arg) => {
   let adjustedStart = new Date(
-    Date.parse(arg.event.start) + new Date().getTimezoneOffset() * 60 * 1000
+    Date.parse(arg.event.start) + new Date().getTimezoneOffset() * 60000
   );
   let adjustedEnd = new Date(
-    Date.parse(arg.event.end) + new Date().getTimezoneOffset() * 60 * 1000
+    Date.parse(arg.event.end) + new Date().getTimezoneOffset() * 60000
   );
-  startPicker.setDate(adjustedStart);
-  endPicker.setDate(adjustedEnd);
+  startPicker.setDate(Date.parse(arg.event.end));
+  endPicker.setDate(Date.parse(arg.event.end));
   fetch("/admin/shifts/" + arg.event.id, {
     method: "PUT",
     headers: {
