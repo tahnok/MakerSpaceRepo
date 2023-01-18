@@ -108,6 +108,7 @@ fetch("/admin/shifts/get_external_staff_needed", {
   .then((res) => res.json())
   .then((res) => {
     calendar = new Calendar(calendarEl, {
+      firstDay: 1, // Needs to play nice with Rails.
       plugins: [
         interactionPlugin,
         timeGridPlugin,
@@ -229,10 +230,39 @@ fetch("/admin/shifts/get_external_staff_needed", {
         hideShowEvents("check");
         return content;
       },
+      loading: (stillLoading) => {
+        if (!stillLoading) {
+          refreshColours();
+        }
+      },
     });
     calendar.render();
   });
 
+const refreshColours = () => {
+  document
+    .querySelectorAll(".fc-prev-button, .fc-next-button, .fc-today-button")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => {
+        fetch(
+          "/admin/shifts/refresh_hours?format=js&date=" +
+            calendar.getDate().toISOString(),
+          {
+            method: "GET",
+          }
+        )
+          .then((r) => r.text())
+          .then((html) => {
+            const userColoursFrag = document
+              .createRange()
+              .createContextualFragment(html);
+            document
+              .getElementById("user-colours-partial")
+              .replaceChildren(userColoursFrag);
+          });
+      });
+    });
+};
 // Refresh pending Shifts
 const refreshPendingShifts = () => {
   fetch("/admin/shifts/pending_shifts?format=js", {
@@ -249,6 +279,7 @@ const refreshPendingShifts = () => {
 
 const populateUsers = (arg) => {
   return new Promise((resolve, reject) => {
+    let currentUser = null || userIdInput.value;
     userIdInput.tomselect.clear();
     userIdInput.tomselect.clearOptions();
     let startDate, endDate;
@@ -291,6 +322,7 @@ const populateUsers = (arg) => {
           });
         });
         resolve();
+        userIdInput.tomselect.setValue(currentUser);
       })
       .catch((err) => {
         reject(err);
@@ -364,6 +396,14 @@ const openModal = (arg) => {
   });
 };
 const modifyEvent = (arg) => {
+  let adjustedStart = new Date(
+    Date.parse(arg.event.start) + new Date().getTimezoneOffset() * 60 * 1000
+  );
+  let adjustedEnd = new Date(
+    Date.parse(arg.event.end) + new Date().getTimezoneOffset() * 60 * 1000
+  );
+  startPicker.setDate(adjustedStart);
+  endPicker.setDate(adjustedEnd);
   fetch("/admin/shifts/" + arg.event.id, {
     method: "PUT",
     headers: {
@@ -371,8 +411,8 @@ const modifyEvent = (arg) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      start_datetime: arg.event.start,
-      end_datetime: arg.event.end,
+      start_datetime: adjustedStart,
+      end_datetime: adjustedEnd,
       format: "json",
     }),
   })

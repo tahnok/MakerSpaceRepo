@@ -35,16 +35,9 @@
         </label>
       </div>
 
-      <% @colors.each do |user| %>
-          <div class="pb-2">
-            <label><%= user[:name] %></label>
-            <br>
-            <div class="d-flex">
-              <input type="color" name="color" onchange="updateColor(<%= user[:id] %>, this.value)" class="form-control form-control-color-shift" value="<%= user[:color] %>" title="Choose your color">
-              <input class="form-check-input checkbox-lg ms-1 shift-hide-button" id="user-<%= user[:id] %>" type="checkbox" onclick="toggleVisibility(<%= user[:id] %>)" checked>
-            </div>
-          </div>
-      <% end %>
+      <div id="user-colours-partial">
+        <%= render partial: 'user_colours', locals: {colors:@colors} %>
+      </div>
     </div>
     <div class="col-md-10">
       <div id="calendar"></div>

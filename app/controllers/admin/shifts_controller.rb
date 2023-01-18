@@ -34,21 +34,41 @@ class Admin::ShiftsController < AdminAreaController
         id: StaffSpace.where(space_id: @space_id).pluck(:user_id)
       ).pluck(:name, :id)
     @spaces = Space.all.where(id: SpaceStaffHour.all.pluck(:space_id))
-    @colors = []
+    get_colours(Date.today)
+  end
 
+  def refresh_hours
+    get_colours(Date.parse(params[:date]))
+    render partial: "admin/shifts/user_colours"
+  end
+
+  def get_colours(date)
+    @colors = []
     StaffSpace
       .joins(:user)
       .where(space_id: @space_id)
       .order("users.name")
       .each do |staff|
+        hours =
+          Shift
+            .joins(:shifts_users)
+            .where(
+              shifts_users: {
+                user_id: staff.user.id
+              },
+              space_id: @space_id,
+              start_datetime: date.beginning_of_week..date.end_of_week
+            )
+            .sum do |shift|
+              (shift.end_datetime - shift.start_datetime).to_i / 3600
+            end
         @colors << {
           id: staff.user.id,
-          name: staff.user.name,
+          name: staff.user.name + " (#{"%.2f" % hours} hours)",
           color: staff.color
         }
       end
   end
-
   def pending_shifts
     render partial: "admin/shifts/pending_shifts"
   end
@@ -124,6 +144,7 @@ class Admin::ShiftsController < AdminAreaController
   end
 
   def update
+    puts params
     if params[:shift].present?
       respond_to do |format|
         if @shift.update(shift_params)

@@ -265,6 +265,7 @@ Rails.application.routes.draw do
         get :get_external_staff_needed
         get :get_shift
         get :pending_shifts
+        get :refresh_hours
         get :shift_suggestions
         get :ics
         post :update_color
