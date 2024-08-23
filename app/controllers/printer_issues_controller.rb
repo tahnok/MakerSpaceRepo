@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PrinterIssuesController < StaffAreaController
   layout "staff_area"
 
@@ -11,6 +13,11 @@ class PrinterIssuesController < StaffAreaController
             issue.summary.include? s
           end || "Other"
         end
+
+    respond_to do |format|
+      format.html
+      format.json { render json: { issues: @issues, summary: @issues_summary } }
+    end
   end
 
   def show
@@ -41,14 +48,20 @@ class PrinterIssuesController < StaffAreaController
       )
 
     if @issue.save
-      redirect_to @issue
+      respond_to do |format|
+        format.html { redirect_to @issue }
+        format.json { head :no_content }
+      end
     else
       new # set previous variables
       flash[
         :alert
       ] = "Failed to create issue: #{@issue.errors.full_messages.join("<br />")}".html_safe
       # All this to keep form data on error
-      render :new, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: flash, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -65,12 +78,20 @@ class PrinterIssuesController < StaffAreaController
       flash[
         :alert
       ] = "Failed to update printer issue #{params[:id]}, #{issue.errors.full_messages.join(";")}"
-      redirect_to printer_issues_path
+      respond_to do |format|
+        format.html { redirect_to printer_issues_path }
+        format.json { render json: flash, status: :unprocessable_entity }
+      end
     end
-    if issue.active
-      redirect_to issue
-    else
-      redirect_to printer_issues_path
+    respond_to do |format|
+      format.html do
+        if issue.active
+          redirect_to issue
+        else
+          redirect_to printer_issues_path
+        end
+      end
+      format.json { head :no_content }
     end
   end
 
@@ -79,10 +100,22 @@ class PrinterIssuesController < StaffAreaController
       redirect_to printer_issues_path
       return
     end
-    unless PrinterIssue.find_by(id: params[:id]).destroy
-      flash[:alert] = "Failed to destroy issue"
+    success = PrinterIssue.find_by(id: params[:id]).destroy
+    respond_to do |format|
+      format.html do
+        redirect_to printer_issues_path,
+                    status: :see_other,
+                    alert: ("Failed to destroy issue" unless success)
+      end
+      format.json do
+        if success
+          head :no_content
+        else
+          render json: { alert: "Failed to destroy issue" }
+        end
+        render
+      end
     end
-    redirect_to printer_issues_path, status: :see_other
   end
 
   private
