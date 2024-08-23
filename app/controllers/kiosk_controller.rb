@@ -1,4 +1,6 @@
-class KioskController < ApplicationController
+# frozen_string_literal: true
+
+class KioskController < SessionsController
   layout false, only: :show # no layout
 
   before_action :grant_access
